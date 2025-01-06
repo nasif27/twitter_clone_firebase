@@ -1,27 +1,22 @@
 import { Button, Col, Image, Nav, Row, Spinner } from "react-bootstrap";
 import ProfilePostCard from "./ProfilePostCard";
-import { jwtDecode } from "jwt-decode";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPostsByUser } from "../features/posts/postsSlice";
+import { AuthContext } from "./AuthProvider";
 
-export default function ProfileMidBody({apiURL}) {
+export default function ProfileMidBody() {
     const url = "https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500";
     const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
     const dispatch = useDispatch();
     const posts = useSelector(store => store.posts.posts);      // accessing store page where slice (postsSlice) has been exported to
-    const loading = useSelector(store => store.posts.loading);  
+    const loading = useSelector(store => store.posts.loading);
+    const { currentUser } = useContext(AuthContext);
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            const decodedToken = jwtDecode(token);  // decode token inside local storage & return the object 
-            const userId = decodedToken.id;     // accessing object key (id)
-            // const url = apiURL;
-            dispatch(fetchPostsByUser(userId));     // dispatch -> aync thunk -> extraReducers
-        }
-    }, [dispatch]);
+        dispatch(fetchPostsByUser(currentUser.uid));     // dispatch -> aync thunk -> extraReducers
+    }, [dispatch, currentUser]);
 
     return (
         <Col sm={6} className="bg-light" style={{border: "1px solid lightgrey"}}>
@@ -86,9 +81,7 @@ export default function ProfileMidBody({apiURL}) {
             {posts.map((post) => (
                 <ProfilePostCard 
                     key={post.id} 
-                    content={post.content} 
-                    postId={post.id} 
-                    apiURL={apiURL} 
+                    post={post} 
                 />
             ))}
         </Col>

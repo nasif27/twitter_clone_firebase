@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { savePost } from "../features/posts/postsSlice";
+import { AuthContext } from "./AuthProvider";
 
-export default function NewPostModal({show, handleClose}) {
+export default function NewPostModal({ show, handleClose }) {
     const [postContent, setPostContent] = useState("");     // used as temporary
     const dispatch = useDispatch();
+    const { currentUser } = useContext(AuthContext);
+    const userId = currentUser.uid;
 
     const handleSave = () => {      // Push the data into DB & save it
-        dispatch(savePost(postContent));    // dispatch -> async thunk -> extraReducers
+        dispatch(savePost({ userId, postContent }));    // dispatch -> async thunk -> extraReducers
         handleClose();      // close modal
         setPostContent("");     // empty the postContent array 
     };
